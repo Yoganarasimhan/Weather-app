@@ -1,0 +1,109 @@
+1. App.Component.ts :
+import { Component } from '@angular/core';
+import { CommonService } from './common.service';
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'Weather';
+  IsChangeLocation=false;
+  TodayDate: Date;
+  weatherData: any;
+  cityName: any;
+  constructor(private service:CommonService){
+    this.TodayDate = new Date();
+  }
+  changeLocation(){
+    debugger
+    this.IsChangeLocation = this.IsChangeLocation==true?false:true;
+  }
+  getWeatherDataByCity(){
+ 
+    var city = ("CityName").val();
+    this.service.getWeatherData(city).subscribe(data=>{
+      this.cityName = city;
+      console.log('data',data)
+      this.weatherData = data;
+    })
+  }
+  transform(value: number): number {
+    return Math.round(value);
+  }
+}
+
+2. App.component.html :
+<div class="mainDIv">
+  <div class="container">
+    <div class="weather-side">
+      <div class="weather-gradient"></div>
+      <div class="date-container">
+        <h2 class="date-dayname"> {{TodayDate | date:'EEEE'}} </h2> <span class="date-day"> {{TodayDate | date:'MMM y'}} </span> <i class="location-icon" data-feather="map-pin"> </i> <span class="location"> {{cityName}} </span>
+      </div>
+      <div class="weather-container"><i class="weather-icon" data-feather="sun"></i>
+        <h1 class="weather-temp">{{transform(weatherData.main.temp-273.15)}}°C</h1>
+        <h3 class="weather-desc">{{weatherData.weather[0].description}}</h3>
+      </div>
+    </div>
+    <div class="info-side">
+      <div class="today-info-container">
+        <div class="today-info">
+          <div class="humidity"> <span class="title">HUMIDITY</span><span class="value">{{weatherData.main.humidity}} %</span>
+            <div class="clear"></div>
+          </div>
+          <div class="wind"> <span class="title">WIND</span><span class="value">{{weatherData.wind.speed}} km/h</span>
+            <div class="clear"></div>
+          </div>
+        </div>
+      </div>
+      <div class="location-container">
+        <button class="location-button" type="button" (click)="changeLocation()"> <i data-feather="map-pin"></i><span>Change location</span></button>
+      </div>
+      <div>
+        <input type="text" (change)="getWeatherDataByCity()" id="CityName" class="form-control"  placeholder="enter city name">
+      </div>
+    </div>
+  </div>
+  </div>
+
+3. Common.service.ts :
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+@Injectable({
+  providedIn: 'root'
+})
+export class CommonService {
+  constructor(private http:HttpClient) { }
+  getWeatherData(city:string):Observable<any>{
+    var  headers={
+      'X-RapidAPI-Key': '34e65fe2f0mshb98fd4f81c19c2cp1e6926jsn4dc2cda5a444',
+      'X-RapidAPI-Host': 'openweather43.p.rapidapi.com'
+    }
+    var q = city;
+    var appid = ['da0f9c8d90bde7e619c3ec47766a42f4'];
+    var units = 'standard';
+      return this.http.get('https://openweather43.p.rapidapi.com/weather',{params:{q,appid,units },headers:headers})
+  }
+}
+
+4. App.module.ts :
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
